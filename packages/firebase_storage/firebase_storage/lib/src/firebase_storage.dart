@@ -78,9 +78,13 @@ class FirebaseStorage extends FirebasePluginPlatform {
     // Since we need to create a key using the bucket, it must not include "gs://"
     // since native does not include it when requesting the bucket. This keeps
     // the code backwards compatible but also works with the refactor.
-    if (_bucket.startsWith('gs://')) {
-      _bucket = _bucket.replaceFirst('gs://', '');
-    }
+    
+    // After changes introduced in firebase storage JS SDK
+    // https://github.com/FirebaseExtended/flutterfire/pull/6848
+    // its required again to provide url with gs://
+    // if (_bucket.startsWith('gs://')) {
+    //  _bucket = _bucket.replaceFirst('gs://', '');
+    // }
 
     String key = '${app.name}|$_bucket';
     if (_cachedInstances.containsKey(key)) {
