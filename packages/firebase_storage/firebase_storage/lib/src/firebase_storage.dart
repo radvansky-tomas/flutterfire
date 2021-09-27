@@ -56,6 +56,8 @@ class FirebaseStorage extends FirebasePluginPlatform {
   ///
   /// If [app] is not provided, the default Firebase app will be used.
   /// If [bucket] is not provided, the default storage bucket will be used.
+  /// [bucket] MUST include `gs://` protocol
+  /// Add `gs://default-bucket` if you want to connect to Firebase Storage Emulator
   static FirebaseStorage instanceFor({
     FirebaseApp? app,
     String? bucket,
@@ -78,13 +80,18 @@ class FirebaseStorage extends FirebasePluginPlatform {
     // Since we need to create a key using the bucket, it must not include "gs://"
     // since native does not include it when requesting the bucket. This keeps
     // the code backwards compatible but also works with the refactor.
-    
-    // After changes introduced in firebase storage JS SDK
-    // https://github.com/FirebaseExtended/flutterfire/pull/6848
-    // its required again to provide url with gs://
-    // if (_bucket.startsWith('gs://')) {
-    //  _bucket = _bucket.replaceFirst('gs://', '');
-    // }
+
+    if (!_bucket.startsWith('gs://')) {
+      _throwNoBucketError(
+          'Invalid bucket URL. Ensure you have used full bucket URL including gs://');
+    } else {
+      // After changes introduced in firebase storage JS SDK
+      // https://github.com/FirebaseExtended/flutterfire/pull/6848
+      // its required again to provide url with gs://
+      if (!kIsWeb) {
+        _bucket = _bucket.replaceFirst('gs://', '');
+      }
+    }
 
     String key = '${app.name}|$_bucket';
     if (_cachedInstances.containsKey(key)) {
